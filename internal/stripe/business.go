@@ -145,9 +145,9 @@ func SyncCustomerPortalProfiles(profiles []PortalProfile) map[string]string {
 	for _, p := range profiles {
 		desired[p.Name] = true
 		params := buildPortalParams(p)
-		params.Active = stripe.Bool(true)
 
 		if existingID, ok := existing[p.Name]; ok {
+			params.Active = stripe.Bool(true)
 			_, err := portalconfig.Update(existingID, params)
 			if err != nil {
 				log.Printf("  portal [%s]: update warning — %v", p.Name, err)

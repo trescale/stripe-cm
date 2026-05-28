@@ -17,13 +17,9 @@ func SyncShippingRates(rates []ShippingRateConfig) {
 
 		if existingRate, ok := existing[r.DisplayName]; ok {
 			params := &stripe.ShippingRateParams{
-				Active:      stripe.Bool(r.Active),
-				DisplayName: stripe.String(r.DisplayName),
+				Active: stripe.Bool(r.Active),
 			}
 			params.AddMetadata("stripe_cm_managed", "true")
-			if r.TaxBehavior != "" {
-				params.TaxBehavior = stripe.String(r.TaxBehavior)
-			}
 			_, err := shippingrate.Update(existingRate.ID, params)
 			if err != nil {
 				log.Printf("  shipping [%s]: update warning — %v", r.DisplayName, err)
