@@ -55,6 +55,10 @@ func runSync(_ *cobra.Command, _ []string) error {
 	scm.SyncBillingMeters(sc.BillingMeters)
 	scm.SyncEntitlements(sc.Entitlements)
 	scm.SyncApplePayDomains(sc.ApplePayDomains)
+	scm.SyncBranding(sc.Branding)
+	scm.SyncPayoutSchedule(sc.PayoutSchedule)
+	scm.SyncPaymentMethodsConfig(sc.PaymentMethods)
+	scm.SyncBillingAlerts(sc.BillingAlerts)
 
 	if len(portalIDs) > 0 {
 		out, _ := json.MarshalIndent(portalIDs, "", "  ")

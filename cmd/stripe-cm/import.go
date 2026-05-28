@@ -78,6 +78,10 @@ func runImport(_ *cobra.Command, _ []string) error {
 	sc.BillingMeters = scm.ImportBillingMeters()
 	sc.Entitlements = scm.ImportEntitlements()
 	sc.ApplePayDomains = scm.ImportApplePayDomains()
+	sc.Branding = scm.ImportBranding(existing.Branding)
+	sc.PayoutSchedule = scm.ImportPayoutSchedule(existing.PayoutSchedule)
+	sc.PaymentMethods = scm.ImportPaymentMethodsConfig()
+	sc.BillingAlerts = scm.ImportBillingAlerts()
 
 	var buf bytes.Buffer
 	enc := yaml.NewEncoder(&buf)

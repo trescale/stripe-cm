@@ -332,3 +332,70 @@ apple_pay_domains:
   - "app.acme.com"
   - "checkout.acme.com"
   - "pay.acme.com"
+
+# ─── Branding ────────────────────────────────────────────────────────────────
+# Account branding shown on invoices, receipts, Checkout, and the portal.
+# Icon and logo values are Stripe file IDs (upload via dashboard first).
+# NOTE: Requires a live Stripe key (not test mode).
+
+branding:
+  icon: "file_abc123"
+  logo: "file_def456"
+  primary_color: "#6366f1"
+  secondary_color: "#818cf8"
+
+# ─── Payout schedule ────────────────────────────────────────────────────────
+# Controls how and when Stripe sends payouts to your bank account.
+# NOTE: Requires a live Stripe key (not test mode).
+
+payout_schedule:
+  interval: "weekly" # manual | daily | weekly | monthly
+  weekly_anchor: "monday" # monday | tuesday | wednesday | thursday | friday
+  delay_days: 2
+
+# ─── Payment method configuration ───────────────────────────────────────────
+# Enable or disable payment methods globally. Values: "active" or "inactive".
+# Only methods you want to explicitly configure need to be listed.
+
+payment_methods_config:
+  card:
+    available: "active"
+  apple_pay:
+    available: "active"
+  google_pay:
+    available: "active"
+  link:
+    available: "active"
+  cashapp:
+    available: "inactive"
+  klarna:
+    available: "active"
+  affirm:
+    available: "inactive"
+  afterpay_clearpay:
+    available: "inactive"
+  amazon_pay:
+    available: "inactive"
+  paypal:
+    available: "inactive"
+  sepa_debit:
+    available: "inactive"
+  us_bank_account:
+    available: "inactive"
+  ideal:
+    available: "inactive"
+  bancontact:
+    available: "inactive"
+
+# ─── Billing alerts ─────────────────────────────────────────────────────────
+# Usage-based billing alerts. Matched by title.
+# Triggers notifications when usage crosses a threshold.
+
+billing_alerts:
+  - title: "API usage approaching limit"
+    alert_type: "usage_threshold"
+    threshold: 9000
+
+  - title: "Storage quota warning"
+    alert_type: "usage_threshold"
+    threshold: 80

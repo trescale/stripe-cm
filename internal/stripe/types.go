@@ -15,6 +15,10 @@ type Config struct {
 	BillingMeters   []BillingMeterConfig `yaml:"billing_meters,omitempty"`
 	Entitlements    []EntitlementConfig  `yaml:"entitlements,omitempty"`
 	ApplePayDomains []string             `yaml:"apple_pay_domains,omitempty"`
+	Branding        BrandingConfig       `yaml:"branding,omitempty"`
+	PayoutSchedule  PayoutScheduleConfig `yaml:"payout_schedule,omitempty"`
+	PaymentMethods  PaymentMethodsConfig `yaml:"payment_methods_config,omitempty"`
+	BillingAlerts   []BillingAlertConfig `yaml:"billing_alerts,omitempty"`
 }
 
 type BusinessConfig struct {
@@ -147,4 +151,59 @@ type BillingMeterConfig struct {
 type EntitlementConfig struct {
 	Name   string `yaml:"name"`
 	Lookup string `yaml:"lookup_key,omitempty"`
+}
+
+type BrandingConfig struct {
+	Icon           string `yaml:"icon,omitempty"`
+	Logo           string `yaml:"logo,omitempty"`
+	PrimaryColor   string `yaml:"primary_color,omitempty"`
+	SecondaryColor string `yaml:"secondary_color,omitempty"`
+}
+
+type PayoutScheduleConfig struct {
+	Interval    string `yaml:"interval,omitempty"`
+	MonthlyAnchor int64  `yaml:"monthly_anchor,omitempty"`
+	WeeklyAnchor  string `yaml:"weekly_anchor,omitempty"`
+	DelayDays     int64  `yaml:"delay_days,omitempty"`
+}
+
+type PaymentMethodsConfig struct {
+	Card          *PMToggle `yaml:"card,omitempty"`
+	ACSSDebit     *PMToggle `yaml:"acss_debit,omitempty"`
+	Affirm        *PMToggle `yaml:"affirm,omitempty"`
+	AfterpayClearpay *PMToggle `yaml:"afterpay_clearpay,omitempty"`
+	Alipay        *PMToggle `yaml:"alipay,omitempty"`
+	AmazonPay     *PMToggle `yaml:"amazon_pay,omitempty"`
+	ApplePay      *PMToggle `yaml:"apple_pay,omitempty"`
+	Bancontact    *PMToggle `yaml:"bancontact,omitempty"`
+	BLIK          *PMToggle `yaml:"blik,omitempty"`
+	Boleto        *PMToggle `yaml:"boleto,omitempty"`
+	CashApp       *PMToggle `yaml:"cashapp,omitempty"`
+	EPS           *PMToggle `yaml:"eps,omitempty"`
+	Giropay       *PMToggle `yaml:"giropay,omitempty"`
+	GooglePay     *PMToggle `yaml:"google_pay,omitempty"`
+	GrabPay       *PMToggle `yaml:"grabpay,omitempty"`
+	IDEAL         *PMToggle `yaml:"ideal,omitempty"`
+	Klarna        *PMToggle `yaml:"klarna,omitempty"`
+	Link          *PMToggle `yaml:"link,omitempty"`
+	OXXO          *PMToggle `yaml:"oxxo,omitempty"`
+	P24           *PMToggle `yaml:"p24,omitempty"`
+	PayNow        *PMToggle `yaml:"paynow,omitempty"`
+	Paypal        *PMToggle `yaml:"paypal,omitempty"`
+	PromptPay     *PMToggle `yaml:"promptpay,omitempty"`
+	SEPADebit     *PMToggle `yaml:"sepa_debit,omitempty"`
+	Sofort        *PMToggle `yaml:"sofort,omitempty"`
+	USBankAccount *PMToggle `yaml:"us_bank_account,omitempty"`
+	WeChatPay     *PMToggle `yaml:"wechat_pay,omitempty"`
+}
+
+type PMToggle struct {
+	Available string `yaml:"available,omitempty"`
+}
+
+type BillingAlertConfig struct {
+	Title     string `yaml:"title"`
+	AlertType string `yaml:"alert_type"`
+	Filter    string `yaml:"filter,omitempty"`
+	Threshold int64  `yaml:"threshold,omitempty"`
 }
