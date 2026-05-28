@@ -1,4 +1,4 @@
-stripe-cm
+/stripe-cm
 dist/
 *.exe
 .DS_Store
