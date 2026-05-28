@@ -68,12 +68,21 @@ func SyncCoupons(coupons []CouponConfig) {
 		if desired[id] {
 			continue
 		}
-		_, err := coupon.Del(id, nil)
+		c, err := coupon.Get(id, nil)
+		if err != nil {
+			log.Printf("  coupons [%s]: fetch warning — %v", id, err)
+			continue
+		}
+		if c.TimesRedeemed > 0 {
+			log.Printf("  coupons [%s]: skipped deletion (redeemed %d times, may be referenced by active subscriptions)", id, c.TimesRedeemed)
+			continue
+		}
+		_, err = coupon.Del(id, nil)
 		if err != nil {
 			log.Printf("  coupons [%s]: delete warning — %v", id, err)
 			continue
 		}
-		log.Printf("  coupons [%s]: deleted", id)
+		log.Printf("  coupons [%s]: deleted (never redeemed)", id)
 	}
 }
 
