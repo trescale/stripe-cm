@@ -77,23 +77,14 @@ stripe-cm import -o stripe.yaml --merge stripe.yaml
 
 ## Configuration Reference
 
+See [`examples/full-config.yaml`](examples/full-config.yaml) for a comprehensive example with every resource type, all available fields, and inline comments explaining each option.
+
+Minimal example:
+
 ```yaml
 business:
   name: "My Company"
   support_email: "support@example.com"
-  support_url: "https://example.com/support"
-
-tax:
-  automatic: true
-  default_tax_code: "txcd_10000000"
-
-billing:
-  subscriptions:
-    default_payment_method: "card"
-    proration_behavior: "create_prorations"
-  invoices:
-    days_until_due: 30
-    footer: "Thank you for your business"
 
 customer_portal:
   profiles:
@@ -110,10 +101,6 @@ customer_portal:
         invoice_history:
           enabled: true
 
-checkout:
-  payment_methods: [card]
-  tax_id_collection: true
-
 webhooks:
   - url: "https://api.example.com/webhooks/stripe"
     enabled_events:
@@ -126,44 +113,11 @@ coupons:
     name: "Launch discount"
     percent_off: 50
     duration: "once"
-
-promotion_codes:
-  - code: "EARLY_ACCESS"
-    coupon: "LAUNCH50"
-    max_redemptions: 100
-    active: true
-
-tax_rates:
-  - display_name: "CA Sales Tax"
-    percentage: 8.625
-    country: "US"
-    state: "CA"
-    tax_type: "sales_tax"
-    inclusive: false
-    active: true
-
-shipping_rates:
-  - display_name: "Free Shipping"
-    amount: 0
-    currency: "usd"
-    active: true
-
-billing_meters:
-  - event_name: "api_calls"
-    display_name: "API Calls"
-    aggregation: "count"
-
-entitlements:
-  - name: "advanced_analytics"
-    lookup_key: "advanced_analytics"
-
-apple_pay_domains:
-  - "app.example.com"
 ```
 
 ## Resource Management
 
-stripe-cm uses metadata tags (`retier_managed: "true"`) to track which Stripe resources it manages. Resources created outside of stripe-cm are never modified or deleted.
+stripe-cm uses metadata tags (`stripe_cm_managed: "true"`) to track which Stripe resources it manages. Resources created outside of stripe-cm are never modified or deleted.
 
 | Resource | Unique Key | Sync | Import |
 |----------|-----------|------|--------|

@@ -1,0 +1,334 @@
+# stripe-cm full configuration example
+#
+# This file demonstrates every configurable resource supported by stripe-cm.
+# Copy it as a starting point and remove sections you don't need.
+#
+# Usage:
+#   stripe-cm sync --config stripe.yaml
+#   stripe-cm import -o stripe.yaml --merge stripe.yaml
+
+# ─── Account ─────────────────────────────────────────────────────────────────
+# Business profile shown to customers on invoices, receipts, and the portal.
+# NOTE: Business profile updates require a live Stripe key (not test mode).
+
+business:
+  name: "Acme Corp"
+  support_email: "billing@acme.com"
+  support_url: "https://acme.com/support"
+  support_phone: "+1-555-123-4567"
+
+# ─── Tax ─────────────────────────────────────────────────────────────────────
+# Global tax settings. The "automatic" flag is local-only (used by your app
+# to decide whether to enable Stripe Tax on checkout sessions).
+
+tax:
+  automatic: true
+  default_tax_code: "txcd_10000000" # General - Tangible Goods
+
+# ─── Billing defaults ────────────────────────────────────────────────────────
+# Local-only settings applied per-request when creating subscriptions,
+# invoices, and checkout sessions. Not stored on Stripe.
+
+billing:
+  subscriptions:
+    default_payment_method: "card"
+    proration_behavior: "create_prorations" # create_prorations | always_invoice | none
+    missing_payment_method: "default_incomplete" # default_incomplete | cancel | pause
+  invoices:
+    days_until_due: 30
+    footer: "Thank you for your business — Acme Corp"
+
+# ─── Customer portal ─────────────────────────────────────────────────────────
+# Multiple named portal profiles. Each gets its own Stripe portal configuration.
+# Profiles not listed here will be deactivated on sync.
+
+customer_portal:
+  profiles:
+    # Default portal for paying customers
+    - name: "default"
+      default_return_url: "https://app.acme.com/billing"
+      features:
+        subscription_cancel:
+          enabled: true
+          mode: "at_period_end" # at_period_end | immediately
+          proration_behavior: "none" # none | create_prorations | always_invoice
+        subscription_update:
+          enabled: true
+          proration_behavior: "create_prorations"
+        payment_method_update:
+          enabled: true
+        invoice_history:
+          enabled: true
+
+    # Restricted portal for free-tier users (no cancel/change plan)
+    - name: "free"
+      default_return_url: "https://app.acme.com/billing"
+      features:
+        subscription_cancel:
+          enabled: false
+        subscription_update:
+          enabled: false
+        payment_method_update:
+          enabled: true
+        invoice_history:
+          enabled: true
+
+    # Enterprise portal with immediate cancellation + proration
+    - name: "enterprise"
+      default_return_url: "https://app.acme.com/billing"
+      features:
+        subscription_cancel:
+          enabled: true
+          mode: "immediately"
+          proration_behavior: "create_prorations"
+        subscription_update:
+          enabled: true
+          proration_behavior: "always_invoice"
+        payment_method_update:
+          enabled: true
+        invoice_history:
+          enabled: true
+
+# ─── Checkout ────────────────────────────────────────────────────────────────
+# Local-only settings applied when creating Stripe Checkout sessions.
+
+checkout:
+  payment_methods:
+    - card
+  allow_promotion_codes: true
+  collect_phone_number: false
+  tax_id_collection: true
+
+# ─── Webhooks ────────────────────────────────────────────────────────────────
+# Webhook endpoints. Matched by URL on sync. Only manages endpoints tagged
+# with stripe_cm_managed metadata.
+
+webhooks:
+  # Production webhook
+  - url: "https://api.acme.com/webhooks/stripe"
+    description: "Production event handler"
+    enabled_events:
+      - checkout.session.completed
+      - checkout.session.expired
+      - customer.created
+      - customer.updated
+      - customer.deleted
+      - customer.subscription.created
+      - customer.subscription.updated
+      - customer.subscription.deleted
+      - customer.subscription.paused
+      - customer.subscription.resumed
+      - customer.subscription.trial_will_end
+      - invoice.created
+      - invoice.finalized
+      - invoice.paid
+      - invoice.payment_failed
+      - invoice.upcoming
+      - payment_intent.succeeded
+      - payment_intent.payment_failed
+      - charge.refunded
+      - charge.dispute.created
+      - billing_portal.session.created
+
+  # Staging webhook (can be disabled without removing)
+  - url: "https://staging-api.acme.com/webhooks/stripe"
+    description: "Staging environment"
+    disabled: true
+    enabled_events:
+      - checkout.session.completed
+      - customer.subscription.created
+      - customer.subscription.updated
+      - invoice.paid
+
+# ─── Coupons ─────────────────────────────────────────────────────────────────
+# Discount coupons. Matched by ID on sync. Coupons are mostly immutable
+# after creation — only name and metadata can be updated.
+
+coupons:
+  # One-time 50% off
+  - id: "LAUNCH50"
+    name: "Launch discount"
+    percent_off: 50
+    duration: "once" # once | repeating | forever
+
+  # 20% off forever
+  - id: "ANNUAL20"
+    name: "Annual plan discount"
+    percent_off: 20
+    duration: "forever"
+
+  # $10 off for 3 months
+  - id: "WELCOME10"
+    name: "Welcome credit"
+    amount_off: 1000 # in cents
+    currency: "usd"
+    duration: "repeating"
+    duration_in_months: 3
+
+  # Limited redemption coupon
+  - id: "VIP100"
+    name: "VIP early access"
+    percent_off: 100
+    duration: "once"
+    max_redemptions: 50
+
+# ─── Promotion codes ─────────────────────────────────────────────────────────
+# Customer-facing codes that reference coupons. Matched by code on sync.
+
+promotion_codes:
+  - code: "EARLYBIRD"
+    coupon: "LAUNCH50"
+    max_redemptions: 500
+    active: true
+
+  - code: "FRIEND20"
+    coupon: "ANNUAL20"
+    active: true
+
+  - code: "WELCOME"
+    coupon: "WELCOME10"
+    max_redemptions: 1000
+    active: true
+
+# ─── Tax rates ───────────────────────────────────────────────────────────────
+# Custom tax rates. Matched by display_name + country + state.
+# Tax rates can't be deleted — they're deactivated when removed from config.
+
+tax_rates:
+  - display_name: "CA Sales Tax"
+    description: "California state sales tax"
+    percentage: 7.25
+    country: "US"
+    state: "CA"
+    tax_type: "sales_tax"
+    inclusive: false
+    active: true
+
+  - display_name: "NY Sales Tax"
+    description: "New York state sales tax"
+    percentage: 8.0
+    country: "US"
+    state: "NY"
+    tax_type: "sales_tax"
+    inclusive: false
+    active: true
+
+  - display_name: "UK VAT Standard"
+    description: "United Kingdom VAT standard rate"
+    percentage: 20.0
+    country: "GB"
+    tax_type: "vat"
+    inclusive: true
+    active: true
+
+  - display_name: "EU VAT Standard"
+    description: "European Union VAT standard rate"
+    percentage: 21.0
+    country: "DE"
+    tax_type: "vat"
+    inclusive: true
+    active: true
+
+# ─── Tax registrations ──────────────────────────────────────────────────────
+# Jurisdictions where you're registered to collect tax.
+# Registrations can't be deleted — they're expired when removed from config.
+
+tax_registrations:
+  - country: "US"
+    state: "CA"
+    type: "state_sales_tax"
+
+  - country: "US"
+    state: "NY"
+    type: "state_sales_tax"
+
+  - country: "GB"
+    type: "standard"
+
+# ─── Shipping rates ─────────────────────────────────────────────────────────
+# Fixed-amount shipping options. Matched by display_name.
+# Amounts are in the smallest currency unit (cents for USD).
+
+shipping_rates:
+  - display_name: "Free Shipping"
+    amount: 0
+    currency: "usd"
+    active: true
+
+  - display_name: "Standard"
+    amount: 500 # $5.00
+    currency: "usd"
+    tax_behavior: "exclusive" # exclusive | inclusive | unspecified
+    active: true
+
+  - display_name: "Express"
+    amount: 1500 # $15.00
+    currency: "usd"
+    tax_behavior: "exclusive"
+    active: true
+
+  - display_name: "Overnight"
+    amount: 2500 # $25.00
+    currency: "usd"
+    tax_behavior: "exclusive"
+    active: true
+
+# ─── Billing meters ─────────────────────────────────────────────────────────
+# Usage-based billing meters. Matched by event_name (immutable after creation).
+# Only display_name can be updated after creation.
+
+billing_meters:
+  # Simple counter (e.g., API calls)
+  - event_name: "api_requests"
+    display_name: "API Requests"
+    aggregation: "count" # count | sum
+
+  # Sum-based meter (e.g., storage bytes, compute seconds)
+  - event_name: "storage_bytes"
+    display_name: "Storage (bytes)"
+    aggregation: "sum"
+    value_key: "bytes" # payload field to sum
+
+  # Hourly-windowed meter
+  - event_name: "compute_seconds"
+    display_name: "Compute Time"
+    aggregation: "sum"
+    value_key: "seconds"
+    event_time_window: "hour" # hour | day
+
+# ─── Entitlements ────────────────────────────────────────────────────────────
+# Feature flags managed via Stripe Entitlements.
+# Matched by lookup_key (stable identifier used in code).
+
+entitlements:
+  - name: "Single Sign-On"
+    lookup_key: "sso"
+
+  - name: "Advanced Analytics"
+    lookup_key: "advanced_analytics"
+
+  - name: "Custom Branding"
+    lookup_key: "custom_branding"
+
+  - name: "Audit Logs"
+    lookup_key: "audit_logs"
+
+  - name: "Priority Support"
+    lookup_key: "priority_support"
+
+  - name: "API Access"
+    lookup_key: "api_access"
+
+  - name: "Webhooks"
+    lookup_key: "webhooks"
+
+  - name: "Multi-Region"
+    lookup_key: "multi_region"
+
+# ─── Apple Pay domains ──────────────────────────────────────────────────────
+# Domains registered for Apple Pay. Simple list of domain names.
+
+apple_pay_domains:
+  - "app.acme.com"
+  - "checkout.acme.com"
+  - "pay.acme.com"
