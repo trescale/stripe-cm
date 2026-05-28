@@ -335,12 +335,20 @@ apple_pay_domains:
 
 # ─── Branding ────────────────────────────────────────────────────────────────
 # Account branding shown on invoices, receipts, Checkout, and the portal.
-# Icon and logo values are Stripe file IDs (upload via dashboard first).
 # NOTE: Requires a live Stripe key (not test mode).
+#
+# For icon/logo you can either:
+#   1. Set icon/logo to a Stripe file ID (e.g. "file_abc123")
+#   2. Set icon_file/logo_file to a local image path — stripe-cm uploads it automatically
+# Icon: square, min 128x128px. Logo: landscape, min 128px wide.
 
 branding:
-  icon: "file_abc123"
-  logo: "file_def456"
+  # Option A: local file paths (auto-uploaded on sync)
+  icon_file: "./assets/icon.png"
+  logo_file: "./assets/logo.png"
+  # Option B: pre-uploaded Stripe file IDs
+  # icon: "file_abc123"
+  # logo: "file_def456"
   primary_color: "#6366f1"
   secondary_color: "#818cf8"
 

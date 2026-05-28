@@ -158,6 +158,8 @@ type BrandingConfig struct {
 	Logo           string `yaml:"logo,omitempty"`
 	PrimaryColor   string `yaml:"primary_color,omitempty"`
 	SecondaryColor string `yaml:"secondary_color,omitempty"`
+	IconFile       string `yaml:"icon_file,omitempty"`
+	LogoFile       string `yaml:"logo_file,omitempty"`
 }
 
 type PayoutScheduleConfig struct {

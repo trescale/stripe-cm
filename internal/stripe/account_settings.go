@@ -2,13 +2,53 @@ package stripe
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/account"
+	"github.com/stripe/stripe-go/v81/file"
 )
 
+func uploadFile(path string, purpose stripe.FilePurpose) (string, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer func() { _ = f.Close() }()
+	params := &stripe.FileParams{
+		Purpose:    stripe.String(string(purpose)),
+		Filename:   stripe.String(filepath.Base(path)),
+		FileReader: f,
+	}
+	result, err := file.New(params)
+	if err != nil {
+		return "", err
+	}
+	return result.ID, nil
+}
+
 func SyncBranding(cfg BrandingConfig) {
+	if cfg.IconFile != "" {
+		id, err := uploadFile(cfg.IconFile, stripe.FilePurposeBusinessIcon)
+		if err != nil {
+			log.Printf("  branding: icon upload warning — %v", err)
+		} else {
+			cfg.Icon = id
+			log.Printf("  branding: uploaded icon %s → %s", cfg.IconFile, id)
+		}
+	}
+	if cfg.LogoFile != "" {
+		id, err := uploadFile(cfg.LogoFile, stripe.FilePurposeBusinessLogo)
+		if err != nil {
+			log.Printf("  branding: logo upload warning — %v", err)
+		} else {
+			cfg.Logo = id
+			log.Printf("  branding: uploaded logo %s → %s", cfg.LogoFile, id)
+		}
+	}
+
 	if cfg.Icon == "" && cfg.Logo == "" && cfg.PrimaryColor == "" && cfg.SecondaryColor == "" {
 		log.Println("  branding: no changes")
 		return
